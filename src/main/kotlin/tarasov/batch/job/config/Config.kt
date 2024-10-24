@@ -29,18 +29,15 @@ class Config {
         delimited().names("firstName", "lastName")
         targetType(Person::class.java)
     }.build()
-
+    
     @Bean
-    fun personItemProcessor() = PersonItemProcessor()
+    fun writer(dataSource: DataSource) = JdbcBatchItemWriterBuilder<Person>().apply {
+        sql("INSERT INTO people (first_name, last_name) VALUES (:firstName, :lastName)")
+        dataSource(dataSource)
+        beanMapped()
 
-    @Bean
-    fun writer(dataSource: DataSource): JdbcBatchItemWriter<Person> {
-        return JdbcBatchItemWriterBuilder<Person>()
-                .sql("INSERT INTO people (first_name, last_name) VALUES (:firstName, :lastName)")
-                .dataSource(dataSource)
-                .beanMapped()
-                .build()
-    }
+    }.build()
+
 
     @Bean
     fun firstStep(jobRepository: JobRepository, transactionManager: DataSourceTransactionManager,
